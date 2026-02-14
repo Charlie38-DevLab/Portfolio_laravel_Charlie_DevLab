@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+        <title>@yield('title', 'Charlie DevLab - Développeur Web Fullstack')</title>
+
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+        <!-- Styles -->
+        <style>
+            :root {
+                --primary: #6C5CE7;
+                --primary-dark: #5849C7;
+                --primary-light: #A29BFE;
+                --secondary: #00B8A9;
+                --accent-pink: #FF6B9D;
+                --accent-orange: #FF8B4D;
+                --dark-bg: #0A0E27;
+                --dark-card: #151934;
+                --dark-border: #1F2544;
+                --text-primary: #E8E8E8;
+                --text-secondary: #A8A8B3;
+                --success: #00D4AA;
+                --warning: #FFB800;
+                --error: #FF4757;
+            }
+
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Sora', sans-serif;
+                background: var(--dark-bg);
+                color: var(--text-primary);
+                line-height: 1.6;
+                overflow-x: hidden;
+            }
+
+            /* Animations globales */
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+
+            @keyframes fadeOut {
+                to {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                }
+            }
+
+            @keyframes slideInRight {
+                from {
+                    opacity: 0;
+                    transform: translateX(50px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+
+            @keyframes pulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+            }
+
+            @keyframes gradient-shift {
+                0% { background-position: 0% 50%; }
+                50% { background-position: 100% 50%; }
+                100% { background-position: 0% 50%; }
+            }
+
+            .fade-in-up {
+                animation: fadeInUp 0.6s ease-out forwards;
+            }
+
+            /* Header Styles */
+            .header {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 1000;
+                background: rgba(10, 14, 39, 0.95);
+                backdrop-filter: blur(10px);
+                border-bottom: 1px solid var(--dark-border);
+                transition: all 0.3s ease;
+            }
+
+            .header.scrolled {
+                background: rgba(10, 14, 39, 0.98);
+                box-shadow: 0 4px 30px rgba(108, 92, 231, 0.1);
+            }
+
+            .nav-container {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 1.2rem 2rem;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .logo {
+                display: flex;
+                align-items: center;
+                gap: 0.8rem;
+                text-decoration: none;
+                color: var(--text-primary);
+                font-weight: 700;
+                font-size: 1.3rem;
+                transition: transform 0.3s ease;
+            }
+
+            .logo:hover {
+                transform: scale(1.05);
+            }
+
+            .logo-icon {
+                width: 45px;
+                height: 45px;
+                background: linear-gradient(135deg, var(--primary), var(--primary-light));
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 1.5rem;
+                font-weight: 700;
+                font-family: 'JetBrains Mono', monospace;
+            }
+
+            .logo-text {
+                display: flex;
+                flex-direction: column;
+                line-height: 1.2;
+            }
+
+            .logo-title {
+                font-size: 1.1rem;
+                background: linear-gradient(135deg, var(--primary-light), var(--primary));
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+            .logo-subtitle {
+                font-size: 0.7rem;
+                color: var(--text-secondary);
+                font-weight: 400;
+            }
+
+            /* Navigation wrapper */
+            .nav-wrapper {
+                display: flex;
+                align-items: center;
+                gap: 2rem;
+            }
+
+            .nav-menu {
+                display: flex;
+                gap: 2.5rem;
+                list-style: none;
+                align-items: center;
+            }
+
+            .nav-link {
+                color: var(--text-secondary);
+                text-decoration: none;
+                font-weight: 500;
+                font-size: 0.95rem;
+                position: relative;
+                transition: color 0.3s ease;
+                padding: 0.5rem 0;
+            }
+
+            .nav-link::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 0;
+                height: 2px;
+                background: linear-gradient(90deg, var(--primary), var(--secondary));
+                transition: width 0.3s ease;
+            }
+
+            .nav-link:hover,
+            .nav-link.active {
+                color: var(--text-primary);
+            }
+
+            .nav-link:hover::after,
+            .nav-link.active::after {
+                width: 100%;
+            }
+
+            .auth-buttons {
+                display: flex;
+                gap: 1rem;
+                align-items: center;
+            }
+
+            .btn {
+                padding: 0.7rem 1.5rem;
+                border-radius: 10px;
+                font-weight: 600;
+                font-size: 0.9rem;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                cursor: pointer;
+                border: none;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .btn-outline {
+                background: transparent;
+                color: var(--text-primary);
+                border: 2px solid var(--dark-border);
+            }
+
+            .btn-outline:hover {
+                border-color: var(--primary);
+                background: rgba(108, 92, 231, 0.1);
+                transform: translateY(-2px);
+            }
+
+            .btn-primary {
+                background: linear-gradient(135deg, var(--primary), var(--primary-light));
+                color: white;
+                box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+            }
+
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 25px rgba(108, 92, 231, 0.4);
+            }
+
+            /* Mobile Menu Toggle */
+            .mobile-toggle {
+                display: none;
+                flex-direction: column;
+                gap: 0.4rem;
+                cursor: pointer;
+                padding: 0.5rem;
+                background: transparent;
+                border: none;
+                z-index: 1001;
+            }
+
+            .mobile-toggle span {
+                width: 25px;
+                height: 3px;
+                background: var(--text-primary);
+                border-radius: 3px;
+                transition: all 0.3s ease;
+            }
+
+            .mobile-toggle.active span:nth-child(1) {
+                transform: rotate(45deg) translate(8px, 8px);
+            }
+
+            .mobile-toggle.active span:nth-child(2) {
+                opacity: 0;
+            }
+
+            .mobile-toggle.active span:nth-child(3) {
+                transform: rotate(-45deg) translate(7px, -7px);
+            }
+
+            /* Main Content */
+            main {
+                margin-top: 80px;
+                min-height: calc(100vh - 80px);
+            }
+
+            /* Footer */
+            .footer {
+                background: var(--dark-card);
+                border-top: 1px solid var(--dark-border);
+                padding: 4rem 2rem 2rem;
+                margin-top: 6rem;
+            }
+
+            .footer-container {
+                max-width: 1400px;
+                margin: 0 auto;
+                display: grid;
+                grid-template-columns: 2fr 1fr 1fr 1fr;
+                gap: 3rem;
+                padding-bottom: 2rem;
+                border-bottom: 1px solid var(--dark-border);
+            }
+
+            .footer-brand {
+                display: flex;
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .footer-brand p {
+                color: var(--text-secondary);
+                line-height: 1.8;
+                max-width: 350px;
+            }
+
+            .footer-contact {
+                display: flex;
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+
+            .footer-contact-item {
+                display: flex;
+                align-items: center;
+                gap: 0.8rem;
+                color: var(--text-secondary);
+                text-decoration: none;
+                transition: color 0.3s ease;
+            }
+
+            .footer-contact-item:hover {
+                color: var(--primary);
+            }
+
+            .footer-section h3 {
+                font-size: 1.1rem;
+                margin-bottom: 1.5rem;
+                color: var(--text-primary);
+            }
+
+            .footer-links {
+                list-style: none;
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .footer-links a {
+                color: var(--text-secondary);
+                text-decoration: none;
+                transition: all 0.3s ease;
+                display: inline-block;
+            }
+
+            .footer-links a:hover {
+                color: var(--primary);
+                transform: translateX(5px);
+            }
+
+            .footer-bottom {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding-top: 2rem;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .footer-bottom p {
+                color: var(--text-secondary);
+                font-size: 0.9rem;
+            }
+
+            .social-links {
+                display: flex;
+                gap: 1rem;
+            }
+
+            .social-link {
+                width: 40px;
+                height: 40px;
+                border-radius: 10px;
+                background: var(--dark-bg);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: var(--text-secondary);
+                text-decoration: none;
+                transition: all 0.3s ease;
+            }
+
+            .social-link:hover {
+                background: var(--primary);
+                color: white;
+                transform: translateY(-3px);
+            }
+
+            /* Notifications */
+            .alert {
+                padding: 1rem 1.5rem;
+                border-radius: 10px;
+                margin-bottom: 1.5rem;
+                animation: fadeIn 0.3s ease;
+            }
+
+            .alert-success {
+                background: rgba(0, 212, 170, 0.1);
+                border: 1px solid var(--success);
+                color: var(--success);
+            }
+
+            .alert-error {
+                background: rgba(255, 71, 87, 0.1);
+                border: 1px solid var(--error);
+                color: var(--error);
+            }
+
+            .alert-info {
+                background: rgba(162, 155, 254, 0.1);
+                border: 1px solid var(--primary-light);
+                color: var(--primary-light);
+            }
+
+            /* Responsive */
+            @media (max-width: 1024px) {
+                .nav-menu {
+                    gap: 1.5rem;
+                }
+
+                .footer-container {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+
+            @media (max-width: 768px) {
+                .mobile-toggle {
+                    display: flex;
+                }
+
+                .nav-wrapper {
+                    position: fixed;
+                    top: 80px;
+                    left: -100%;
+                    width: 100%;
+                    height: calc(100vh - 80px);
+                    background: rgba(10, 14, 39, 0.98);
+                    backdrop-filter: blur(10px);
+                    flex-direction: column;
+                    padding: 2rem;
+                    gap: 2rem;
+                    transition: left 0.3s ease;
+                    overflow-y: auto;
+                }
+
+                .nav-wrapper.active {
+                    left: 0;
+                }
+
+                .nav-menu {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    width: 100%;
+                    gap: 0;
+                }
+
+                .nav-menu li {
+                    width: 100%;
+                    border-bottom: 1px solid var(--dark-border);
+                }
+
+                .nav-link {
+                    display: block;
+                    width: 100%;
+                    padding: 1rem 0;
+                }
+
+                .auth-buttons {
+                    width: 100%;
+                    flex-direction: column;
+                }
+
+                .btn {
+                    width: 100%;
+                    justify-content: center;
+                }
+
+                .footer-container {
+                    grid-template-columns: 1fr;
+                    gap: 2rem;
+                }
+
+                .footer-bottom {
+                    flex-direction: column;
+                    gap: 1.5rem;
+                    text-align: center;
+                }
+
+                /* Garder le texte du logo visible sur mobile */
+                .logo-text {
+                    display: flex !important;
+                }
+
+                /* Réduire légèrement la taille du logo sur petits écrans */
+                .logo {
+                    font-size: 1.1rem;
+                }
+
+                .logo-icon {
+                    width: 40px;
+                    height: 40px;
+                    font-size: 1.3rem;
+                }
+
+                .logo-title {
+                    font-size: 1rem;
+                }
+
+                .logo-subtitle {
+                    font-size: 0.65rem;
+                }
+            }
+
+            /* Pour les très petits écrans (moins de 360px) */
+            @media (max-width: 360px) {
+                .nav-container {
+                    padding: 1rem 1.5rem;
+                }
+
+                .logo {
+                    font-size: 1rem;
+                }
+
+                .logo-icon {
+                    width: 35px;
+                    height: 35px;
+                    font-size: 1.2rem;
+                }
+
+                .logo-title {
+                    font-size: 0.9rem;
+                }
+
+                .logo-subtitle {
+                    font-size: 0.6rem;
+                }
+            }
+        </style>
+
+        @stack('styles')
+    </head>
+    <body>
+        <!-- Header -->
+        <header class="header" id="header">
+            <div class="nav-container">
+                <a href="{{ route('home') }}" class="logo">
+                    <div class="logo-icon">&lt;/&gt;</div>
+                    <div class="logo-text">
+                        <span class="logo-title">Charlie DevLab</span>
+                        <span class="logo-subtitle">by Tech & Form Digital</span>
+                    </div>
+                </a>
+
+                <div class="nav-wrapper" id="navWrapper">
+                    <nav>
+                        <ul class="nav-menu">
+                            <li><a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">Accueil</a></li>
+                            <li><a href="{{ route('about') }}" class="nav-link {{ request()->routeIs('about') ? 'active' : '' }}">À Propos</a></li>
+                            <li><a href="{{ route('realisations.index') }}" class="nav-link {{ request()->routeIs('realisations.*') ? 'active' : '' }}">Réalisations</a></li>
+                            <li><a href="{{ route('product.index') }}" class="nav-link {{ request()->routeIs('product.*') ? 'active' : '' }}">Boutique</a></li>
+                            <li><a href="{{ route('events.index') }}" class="nav-link {{ request()->routeIs('events.*') ? 'active' : '' }}">Événements</a></li>
+                            <li><a href="{{ route('blog.index') }}" class="nav-link {{ request()->routeIs('blog.*') ? 'active' : '' }}">Blog</a></li>
+                            <li><a href="{{ route('public.contact') }}" class="nav-link {{ request()->routeIs('contact') ? 'active' : '' }}">Contact</a></li>
+                        </ul>
+                    </nav>
+
+                    <div class="auth-buttons">
+                        @auth
+                            <a href="{{ route('profile.index') }}" class="btn btn-outline">Mon Profil</a>
+                            <form action="{{ route('logout') }}" method="POST" style="display: inline; width: 100%;">
+                                @csrf
+                                <button type="submit" class="btn btn-outline" style="width: 100%;">Déconnexion</button>
+                            </form>
+                        @else
+                            <a href="{{ route('login') }}" class="btn btn-outline">Connexion</a>
+                            <a href="{{ route('register') }}" class="btn btn-primary">Inscription</a>
+                        @endauth
+                    </div>
+                </div>
+
+                <button class="mobile-toggle" id="mobileToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            @if(session('success'))
+                <div class="alert alert-success">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="alert alert-error">
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            @if(session('info'))
+                <div class="alert alert-info">
+                    {{ session('info') }}
+                </div>
+            @endif
+
+            @yield('content')
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-container">
+                <div class="footer-brand">
+                    <a href="{{ route('home') }}" class="logo">
+                        <div class="logo-icon">&lt;/&gt;</div>
+                        <div class="logo-text">
+                            <span class="logo-title">Charlie DevLab</span>
+                            <span class="logo-subtitle">by Tech & Form Digital</span>
+                        </div>
+                    </a>
+                    <p>Développeur Web Fullstack, Entrepreneur et Formateur. Je crée des solutions digitales innovantes et accompagne les futurs développeurs dans leur parcours.</p>
+                    <div class="footer-contact">
+                        <a href="mailto:createchcharlie@gmail.com" class="footer-contact-item">
+                            <span>✉</span> createchcharlie@gmail.com
+                        </a>
+                        <a href="tel:+2290142089080" class="footer-contact-item">
+                            <span>📞</span> +229 01 42 08 90 80
+                        </a>
+                        <div class="footer-contact-item">
+                            <span>📍</span> Bénin
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Liens Rapides</h3>
+                    <ul class="footer-links">
+                        <li><a href="{{ route('home') }}">Accueil</a></li>
+                        <li><a href="{{ route('realisations.index') }}">Réalisations</a></li>
+                        <li><a href="{{ route('about') }}">À Propos</a></li>
+                        <li><a href="{{ route('public.contact') }}">Contact</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Services</h3>
+                    <ul class="footer-links">
+                        <li><a href="{{ route('product.index') }}">Création de Sites Web</a></li>
+                        <li><a href="{{ route('product.index') }}">Coaching Développeur</a></li>
+                        <li><a href="{{ route('product.index') }}">Formations</a></li>
+                        <li><a href="{{ route('product.index') }}">CV Professionnel</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Ressources</h3>
+                    <ul class="footer-links">
+                        <li><a href="{{ route('blog.index') }}">Blog</a></li>
+                        <li><a href="{{ route('events.index') }}">Événements</a></li>
+                        <li><a href="{{ route('product.index') }}">Programme Affilié</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2026 Charlie DevLab. Fait avec ❤️ au Bénin</p>
+                <div class="social-links">
+                    <a href="https://github.com/Charlie38-DevLab" class="social-link" aria-label="GitHub">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                    </a>
+                    <a href="https://www.linkedin.com/in/charlie-cr%C3%A9atech-46b8753a9/" class="social-link" aria-label="LinkedIn">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="Twitter">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="Instagram">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M7.75 2h8.5A5.75 5.75 0 0122 7.75v8.5A5.75 5.75 0 0116.25 22h-8.5A5.75 5.75 0 012 16.25v-8.5A5.75 5.75 0 017.75 2zm0 1.5A4.25 4.25 0 003.5 7.75v8.5a4.25 4.25 0 004.25 4.25h8.5a4.25 4.25 0 004.25-4.25v-8.5a4.25 4.25 0 00-4.25-4.25h-8.5zM12 7.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9zm0 1.5a3 3 0 100 6 3 3 0 000-6zm5.25-2.5a1 1 0 110 2 1 1 0 010-2z"/></svg>
+                    </a>
+                    <a href="https://www.youtube.com/@CharlieCr%C3%A9aTech" class="social-link" aria-label="YouTube">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                    </a>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Scripts -->
+        <script>
+            // Scroll header effect
+            const header = document.getElementById('header');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+
+            // Mobile menu toggle
+            const mobileToggle = document.getElementById('mobileToggle');
+            const navWrapper = document.getElementById('navWrapper');
+
+            mobileToggle.addEventListener('click', () => {
+                navWrapper.classList.toggle('active');
+                mobileToggle.classList.toggle('active');
+            });
+
+            // Close mobile menu when clicking on a link
+            const navLinks = document.querySelectorAll('.nav-link, .btn');
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    navWrapper.classList.remove('active');
+                    mobileToggle.classList.remove('active');
+                });
+            });
+
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!mobileToggle.contains(e.target) && !navWrapper.contains(e.target)) {
+                    navWrapper.classList.remove('active');
+                    mobileToggle.classList.remove('active');
+                }
+            });
+
+            // Smooth scroll for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+
+            // Auto-hide alerts after 5 seconds
+            document.querySelectorAll('.alert').forEach(alert => {
+                setTimeout(() => {
+                    alert.style.animation = 'fadeOut 0.3s ease forwards';
+                    setTimeout(() => alert.remove(), 300);
+                }, 5000);
+            });
+        </script>
+
+        @stack('scripts')
+    </body>
+</html>
